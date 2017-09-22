@@ -1,0 +1,8 @@
+﻿Tooltip Translator:
+Translate tooltip into arbitrary language in real time.
+The mechanism has a web browser inside and it is just returning the result executed by google translation.
+It is thought that there is still unstable parts, please be careful.
+
+*** Acknowledgments ***
+Mod Settings uses Mod Settings Configurator.
+I am grateful to Mr. Flashkirby99 for making the setting of Mod easy.

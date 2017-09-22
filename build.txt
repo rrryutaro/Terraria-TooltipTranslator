@@ -1,0 +1,8 @@
+﻿author = R
+version = 0.0.1.0
+displayName = Tooltip Translator
+homepage = https://forums.terraria.org/index.php?threads/tooltip-translator.62222/
+weakReferences = FKTModSettings
+buildIgnore = .vs\*, Properties\*, *.csproj, *.user, obj\*, bin\*, *.config, unused\*
+includePDB = false
+languageVersion = 6
