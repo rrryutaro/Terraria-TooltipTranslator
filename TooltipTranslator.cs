@@ -23,13 +23,17 @@ namespace TooltipTranslator
         public string Translation(string str)
         {
             string result = string.Empty;
-            if (translat == null || sourceLangID != Config.sourceLangID || resultLangID != Config.resultLangID)
-            {
-                sourceLangID = Config.sourceLangID;
-                resultLangID = Config.resultLangID;
-                CreateTranslat();
-            }
-            result = translat.Translation(str);
+			try
+			{
+				if (translat == null || sourceLangID != Config.sourceLangID || resultLangID != Config.resultLangID)
+				{
+					sourceLangID = Config.sourceLangID;
+					resultLangID = Config.resultLangID;
+					CreateTranslat();
+				}
+				result = translat.Translation(str);
+			}
+			catch { }
             return result;
         }
 
