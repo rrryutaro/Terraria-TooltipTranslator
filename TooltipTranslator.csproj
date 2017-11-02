@@ -34,8 +34,19 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="Config.cs" />
+    <Compile Include="TooltipTranslatorPlayer.cs" />
+    <Compile Include="TooltipTranslatorTool.cs" />
+    <Compile Include="TooltipTranslatorUI.cs" />
+    <Compile Include="ModUtils.cs" />
+    <Compile Include="Tool.cs" />
     <Compile Include="TooltipTranslator.cs" />
     <Compile Include="Translat.cs" />
+    <Compile Include="UIElements\UIDragablePanel.cs" />
+    <Compile Include="UIElements\UIGrid.cs" />
+    <Compile Include="UIElements\UIHoverImageButton.cs" />
+    <Compile Include="UIElements\UIImageListButton.cs" />
+    <Compile Include="UIElements\UIModState.cs" />
+    <Compile Include="UIElements\UISlot.cs" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="Microsoft.Xna.Framework, Version=4.0.0.0, Culture=neutral, PublicKeyToken=842cf8be1de50553, processorArchitecture=x86">
@@ -54,8 +65,21 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>C:\Windows\Microsoft.NET\assembly\GAC_32\Microsoft.Xna.Framework.Xact\v4.0_4.0.0.0__842cf8be1de50553\Microsoft.Xna.Framework.Xact.dll</HintPath>
     </Reference>
+    <Reference Include="Newtonsoft.Json, Version=10.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\tModLoader\src\tModLoader\Terraria.Libraries\JSON.NET\Newtonsoft.Json.dll</HintPath>
+    </Reference>
+    <Reference Include="ReLogic, Version=1.0.0.0, Culture=neutral, processorArchitecture=x86">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\tModLoader\references\ReLogic.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Windows.Forms" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="build.txt" />
+    <Content Include="description.txt" />
+    <Content Include="icon.png" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\..\tModLoader\src\tModLoader\Terraria.csproj">
@@ -66,11 +90,6 @@
       <Project>{70439a48-ddbe-4116-b99f-335d204f4fc5}</Project>
       <Name>FKTModSettings</Name>
     </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
-    <Content Include="build.txt" />
-    <Content Include="description.txt" />
-    <Content Include="icon.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>

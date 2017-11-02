@@ -1,8 +1,10 @@
-﻿using System;
+﻿	using System;
+using System.IO;
 using System.Text;
-using System.Linq;
 using System.Collections.Generic;
+using System.Linq;
 using Terraria;
+using Terraria.UI;
 using Terraria.GameInput;
 using Terraria.ModLoader;
 using FKTModSettings;
@@ -11,12 +13,13 @@ namespace TooltipTranslator
 {
 	class TooltipTranslator : Mod
 	{
-        internal static TooltipTranslator instance;
+		private static string DictionaryFilePath = $@"{Main.SavePath}\Mods\Cache\TooltipTranslator.txt";
 
-        internal ModHotKey ToggleHotKeyTranslat;
-        internal Translat translat;
-        private int sourceLangID;
-        private int resultLangID;
+		internal static TooltipTranslator instance;
+
+		internal ModHotKey ToggleHotKeyUI;
+		internal Translat translat;
+		internal TooltipTranslatorTool tool;
 
         public bool LoadedFKTModSettings = false;
 
@@ -25,10 +28,8 @@ namespace TooltipTranslator
             string result = string.Empty;
 			try
 			{
-				if (translat == null || sourceLangID != Config.sourceLangID || resultLangID != Config.resultLangID)
+				if (translat == null)
 				{
-					sourceLangID = Config.sourceLangID;
-					resultLangID = Config.resultLangID;
 					CreateTranslat();
 				}
 				result = translat.Translation(str);
@@ -47,29 +48,74 @@ namespace TooltipTranslator
 			};
 		}
 
-        public override void Load()
+		public override void Load()
         {
             instance = this;
-            ToggleHotKeyTranslat = RegisterHotKey("Toggle Translator", "Z");
 
-            Config.LoadConfig();
-            LoadedFKTModSettings = ModLoader.GetMod("FKTModSettings") != null;
-            try
-            {
-                if (LoadedFKTModSettings)
-                {
-                    LoadModSettings();
-                }
-            }
-            catch { }
-        }
+			if (!Main.dedServ)
+			{
+				ToggleHotKeyUI = RegisterHotKey("Toggle Show Translator UI", "Z");
+				tool = new TooltipTranslatorTool();
 
-        private void CreateTranslat()
+				Config.LoadConfig();
+				LoadedFKTModSettings = ModLoader.GetMod("FKTModSettings") != null;
+				try
+				{
+					if (LoadedFKTModSettings)
+					{
+						LoadModSettings();
+					}
+				}
+				catch { }
+			}
+		}
+
+        public void CreateTranslat()
         {
-            translat = new Translat(LangIDToLangStr(Config.sourceLangID), LangIDToLangStr(Config.resultLangID));
-        }
+			if (translat == null)
+			{
+				translat = new Translat(GetTranslatingSite(), LangIDToLangStr(Config.sourceLangID), LangIDToLangStr(Config.resultLangID));
+				LoadTranslatDictionary();
+			}
+			else
+			{
+				translat.Reset(GetTranslatingSite(), LangIDToLangStr(Config.sourceLangID), LangIDToLangStr(Config.resultLangID));
+			}
+		}
 
-        private string LangIDToLangStr(int langID)
+		public void LoadTranslatDictionary()
+		{
+			if (Config.isLoadTranslat && System.IO.File.Exists(DictionaryFilePath))
+			{
+				try
+				{
+					foreach (var line in System.IO.File.ReadAllLines(DictionaryFilePath, Encoding.UTF8))
+					{
+						var keyValue = line.Split('\t');
+						TooltipTranslator.instance.translat.Add(keyValue[0], keyValue[1]);
+					}
+				}
+				catch { }
+			}
+		}
+
+		public void SaveTranslatDictionary()
+		{
+			if (Config.isSaveTranslat)
+			{
+				try
+				{
+					using (var fs = new FileStream(DictionaryFilePath, FileMode.Create))
+					using (var sw = new StreamWriter(fs, Encoding.UTF8))
+					{
+						sw.Write(string.Join(Environment.NewLine, TooltipTranslator.instance.translat.TranslatDictionary.Select(x => $"{x.Key}\t{x.Value}")));
+					}
+				}
+				catch { }
+			}
+		}
+
+		private string LangIDToLangStr(int langID)
         {
             string result = "en";
             switch (langID)
@@ -90,7 +136,23 @@ namespace TooltipTranslator
             return result;
         }
 
-        public override void PreSaveAndQuit()
+		private TranslatingSite GetTranslatingSite()
+		{
+			TranslatingSite result = TranslatingSite.Google;
+			switch (Config.translatingSite)
+			{
+				case 1:
+					result = TranslatingSite.Google;
+					break;
+
+				case 2:
+					result = TranslatingSite.Baidu;
+					break;
+			}
+			return result;
+		}
+
+		public override void PreSaveAndQuit()
         {
             Config.SaveValues();
         }
@@ -102,7 +164,7 @@ namespace TooltipTranslator
                 if (LoadedFKTModSettings && !Main.gameMenu)
                 {
                     UpdateModSettings();
-                }
+				}
             }
             catch { }
         }
@@ -113,10 +175,13 @@ namespace TooltipTranslator
             setting.AddComment($"Tooltip Translator v{TooltipTranslator.instance.Version}");
             setting.AddBool("isAnnounce", "Switching announce", false);
             setting.AddBool("isTranslat", "Translat", false);
-            setting.AddInt("sourceLangID", "Source language no", 0, 11, false);
+			setting.AddBool("isLoadTranslat", "Load translat file", false);
+			setting.AddBool("isSaveTranslat", "Save translat file", false);
+			setting.AddInt("translatingSite", "Translating Site", 1, 2, false);
+			setting.AddComment($"Translating Site: 1:Google 2:Baidu{Environment.NewLine}Baidu url:{Environment.NewLine}{Config.urlBaidu}");
+			setting.AddInt("sourceLangID", "Source language no", 0, 11, false);
             setting.AddInt("resultLangID", "Result language no", 1, 11, false);
-            setting.AddComment("LanguageNo: 0:Auto 1:English[en] 2:Japanese[ja] 3:German[de] 4:Italian[it] 5:French[fr] 6:Spanish[es] 7:Russian[ru] 8:Chinese(simplified)[zh-CN] 9:Chinese(Traditional)[zh-TW] 10:Portuguese[pt] 11:Polish[pl]".Replace(" ", Environment.NewLine));
-            setting.AddBool("isReset", "If it has not been translated," + Environment.NewLine + "translat it when switching", false);
+			setting.AddComment("LanguageNo:" + Environment.NewLine + "0:Auto  1:English[en]  2:Japanese[ja]  3:German[de]  4:Italian[it]  5:French[fr]  6:Spanish[es]  7:Russian[ru]  8:Chinese(simplified)[zh-CN]  9:Chinese(Traditional)[zh-TW]  10:Portuguese[pt]  11:Polish[pl]");
         }
 
         private void UpdateModSettings()
@@ -126,32 +191,54 @@ namespace TooltipTranslator
             {
                 setting.Get("isAnnounce", ref Config.isAnnounce);
                 setting.Get("isTranslat", ref Config.isTranslat);
-                setting.Get("sourceLangID", ref Config.sourceLangID);
+				setting.Get("isLoadTranslat", ref Config.isLoadTranslat);
+				setting.Get("isSaveTranslat", ref Config.isSaveTranslat);
+				setting.Get("translatingSite", ref Config.translatingSite);
+				setting.Get("sourceLangID", ref Config.sourceLangID);
                 setting.Get("resultLangID", ref Config.resultLangID);
-                setting.Get("isReset", ref Config.isReset);
             }
         }
-    }
 
-    class TranslatorPlayer : ModPlayer
-    {
-        public override void ProcessTriggers(TriggersSet triggersSet)
-        {
-            if (TooltipTranslator.instance.ToggleHotKeyTranslat.JustPressed)
-            {
-                Config.isTranslat = !Config.isTranslat;
-                if (Config.isAnnounce)
-                {
-                    Main.NewText("Translation " + (Config.isTranslat ? "On" : "Off"));
-                }
-                if (Config.isTranslat && Config.isTranslat)
-                {
-                    TooltipTranslator.instance.translat.Reset();
-                }
-            }
-        }
-    }
-    class TranslatorGlobalItem : GlobalItem
+		public override void ModifyInterfaceLayers(List<GameInterfaceLayer> layers)
+		{
+			int layerIndex = layers.FindIndex(layer => layer.Name.Equals("Vanilla: Interface Logic 1"));
+
+			layers.Insert(layerIndex, new LegacyGameInterfaceLayer(
+				"TooltipTranslator: UI",
+				delegate
+				{
+					try
+					{
+						tool.UIUpdate();
+						tool.UIDraw();
+					}
+					catch { }
+					return true;
+				},
+				InterfaceScaleType.UI)
+			);
+
+			layerIndex = layers.FindIndex(layer => layer.Name.Equals("Vanilla: Mouse Text"));
+			if (layerIndex != -1)
+			{
+				layers.Insert(layerIndex, new LegacyGameInterfaceLayer(
+					"TooltipTranslator: Tooltip",
+					delegate
+					{
+						try
+						{
+							tool.TooltipDraw();
+						}
+						catch { }
+						return true;
+					},
+					InterfaceScaleType.UI)
+				);
+			}
+		}
+	}
+
+	class TranslatorGlobalItem : GlobalItem
     {
         public override void ModifyTooltips(Item item, List<TooltipLine> tooltips)
         {

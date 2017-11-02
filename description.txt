@@ -3,6 +3,26 @@ Translate tooltip into arbitrary language in real time.
 The mechanism has a web browser inside and it is just returning the result executed by google translation.
 It is thought that there is still unstable parts, please be careful.
 
+You can choose Baidu as a translation site.
+Please specify 2 for "translatingSite" in config setting.
+For Baidu 's translation language setting please directly change "urlBaidu" in config.
+The default url is as follows.
+http://fanyi.baidu.com/?aldtype=16047#auto/zh
+
+--- About UI ---
+The character string being translating is displayed in green in the background.
+To delete from the translation dictionary Right-click the target.
+Please click the reload button when you changed the setting during the game.
+Also, please click the reload button if the translation stops halfway or there is a blank.
+
+--- About Translation File ---
+When "isSaveTranslat" in config is true, it will output the translation dictionary to the file when exit from world.
+Also, if "isLoadTranslat" in config is true, the translation file is read at the start of the game.
+The translation file is output to the following location. (In the case of Windows)
+My Games\Terraria\ModLoader\Mods\Cache\TooltipTranslator.txt
+
 *** Acknowledgments ***
+The UI code of this Mod is based on jopojelly's Recipe Browser (v0.4).
+I am grateful to Mr. jopojelly for publishing a great code.
 Mod Settings uses Mod Settings Configurator.
 I am grateful to Mr. Flashkirby99 for making the setting of Mod easy.

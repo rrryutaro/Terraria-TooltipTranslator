@@ -1,24 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using Microsoft.Xna.Framework;
-using Terraria;
-using Terraria.DataStructures;
-using Terraria.GameInput;
-using Terraria.ID;
+﻿using Terraria;
 using Terraria.IO;
-using Terraria.ModLoader;
-using Terraria.GameContent.UI.Chat;
-using Terraria.ModLoader.IO;
-using Terraria.UI;
-using Terraria.UI.Chat;
 
 namespace TooltipTranslator
 {
     public static class Config
     {
         private static string ConfigPath = $@"{Main.SavePath}\Mod Configs\TooltipTranslator.json";
-        private static Preferences config;
+		private static Preferences config;
         private static int version = 1;
         public static void LoadConfig()
         {
@@ -29,9 +17,13 @@ namespace TooltipTranslator
                 config.Get("version", ref version);
                 config.Get("isAnnounce", ref isAnnounce);
                 config.Get("isTranslat", ref isTranslat);
-                config.Get("sourceLangID", ref sourceLangID);
+				config.Get("isLoadTranslat", ref isLoadTranslat);
+				config.Get("isSaveTranslat", ref isSaveTranslat);
+				config.Get("sourceLangID", ref sourceLangID);
                 config.Get("resultLangID", ref resultLangID);
-            }
+				config.Get("translatingSite", ref translatingSite);
+				config.Get("urlBaidu", ref urlBaidu);
+			}
             else
             {
                 SaveValues();
@@ -43,16 +35,24 @@ namespace TooltipTranslator
             config.Put("version", version);
             config.Put("isAnnounce", isAnnounce);
             config.Put("isTranslat", isTranslat);
-            config.Put("sourceLangID", sourceLangID);
+			config.Put("isLoadTranslat", isLoadTranslat);
+			config.Put("isSaveTranslat", isSaveTranslat);
+			config.Put("sourceLangID", sourceLangID);
             config.Put("resultLangID", resultLangID);
-            config.Save();
-        }
+			config.Put("translatingSite", translatingSite);
+			config.Put("urlBaidu", urlBaidu);
+			config.Save();
+
+			TooltipTranslator.instance.SaveTranslatDictionary();
+		}
 
         public static bool isAnnounce = true;
         public static bool isTranslat = true;
-        public static int sourceLangID = 1;
+		public static bool isLoadTranslat = true;
+		public static bool isSaveTranslat = true;
+		public static int sourceLangID = 1;
         public static int resultLangID = 2;
-
-        public static bool isReset = false;
+		public static int translatingSite = 1;
+		public static string urlBaidu = "http://fanyi.baidu.com/?aldtype=16047#auto/zh";
     }
 }
