@@ -1,4 +1,4 @@
-﻿	using System;
+﻿using System;
 using System.IO;
 using System.Text;
 using System.Collections.Generic;
@@ -8,12 +8,30 @@ using Terraria.UI;
 using Terraria.GameInput;
 using Terraria.ModLoader;
 using FKTModSettings;
+using Newtonsoft.Json;
 
 namespace TooltipTranslator
 {
+	struct TranslationString
+	{
+		public string source;
+		public string result;
+		public TranslationString(string source, string result)
+		{
+			this.source = source;
+			this.result = result;
+		}
+	}
+	class TranslationJson
+	{
+		public string version;
+		public List<TranslationString> translations = new List<TranslationString>();
+	}
+
 	class TooltipTranslator : Mod
 	{
 		private static string DictionaryFilePath = $@"{Main.SavePath}\Mods\Cache\TooltipTranslator.txt";
+		private static string DictionaryFilePathJson = $@"{Main.SavePath}\Mods\Cache\TooltipTranslator.json";
 
 		internal static TooltipTranslator instance;
 
@@ -85,14 +103,28 @@ namespace TooltipTranslator
 
 		public void LoadTranslatDictionary()
 		{
-			if (Config.isLoadTranslat && System.IO.File.Exists(DictionaryFilePath))
+			if (Config.isLoadTranslat && System.IO.File.Exists(DictionaryFilePathJson))
+			{
+				try
+				{
+					var translationJson = JsonConvert.DeserializeObject<TranslationJson>(System.IO.File.ReadAllText(DictionaryFilePathJson, Encoding.UTF8));
+					foreach (var translation in translationJson.translations)
+					{
+						TooltipTranslator.instance.translat.Add(translation.source, translation.result);
+					}
+				}
+				catch { }
+
+			}
+			else if (Config.isLoadTranslat && System.IO.File.Exists(DictionaryFilePath))
 			{
 				try
 				{
 					foreach (var line in System.IO.File.ReadAllLines(DictionaryFilePath, Encoding.UTF8))
 					{
 						var keyValue = line.Split('\t');
-						TooltipTranslator.instance.translat.Add(keyValue[0], keyValue[1]);
+						if (keyValue.Length == 2)
+							TooltipTranslator.instance.translat.Add(keyValue[0], keyValue[1]);
 					}
 				}
 				catch { }
@@ -105,10 +137,14 @@ namespace TooltipTranslator
 			{
 				try
 				{
-					using (var fs = new FileStream(DictionaryFilePath, FileMode.Create))
+					TranslationJson translationJson = new TranslationJson();
+					translationJson.version = TooltipTranslator.instance.Version.ToString();
+					TooltipTranslator.instance.translat.TranslatDictionary.ToList().ForEach(x => translationJson.translations.Add(new TranslationString(x.Key, x.Value)));
+					using (var fs = new FileStream(DictionaryFilePathJson, FileMode.Create))
 					using (var sw = new StreamWriter(fs, Encoding.UTF8))
 					{
-						sw.Write(string.Join(Environment.NewLine, TooltipTranslator.instance.translat.TranslatDictionary.Select(x => $"{x.Key}\t{x.Value}")));
+						//sw.Write(string.Join(Environment.NewLine, TooltipTranslator.instance.translat.TranslatDictionary.Select(x => $"{x.Key}\t{x.Value}")));
+						sw.Write(JsonConvert.SerializeObject(translationJson));
 					}
 				}
 				catch { }

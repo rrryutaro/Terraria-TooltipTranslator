@@ -19,7 +19,9 @@ Also, please click the reload button if the translation stops halfway or there i
 When "isSaveTranslat" in config is true, it will output the translation dictionary to the file when exit from world.
 Also, if "isLoadTranslat" in config is true, the translation file is read at the start of the game.
 The translation file is output to the following location. (In the case of Windows)
-My Games\Terraria\ModLoader\Mods\Cache\TooltipTranslator.txt
+"My Games\Terraria\ModLoader\Mods\Cache\TooltipTranslator.txt" (v0.1.0.1 -> "TooltipTranslator.json")
+From v0.1.0.1 it is saved in json format. Please use formatting tool etc. when editing files.
+If there is no "TooltipTranslator.json", "TooltipTranslator.txt" will be loaded.
 
 *** Acknowledgments ***
 The UI code of this Mod is based on jopojelly's Recipe Browser (v0.4).

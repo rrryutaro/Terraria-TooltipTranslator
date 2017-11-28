@@ -1,5 +1,5 @@
 ﻿author = R
-version = 0.1.0.0
+version = 0.1.0.1
 displayName = Tooltip Translator
 homepage = https://forums.terraria.org/index.php?threads/tooltip-translator.62222/
 weakReferences = FKTModSettings
